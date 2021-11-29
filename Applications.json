@@ -1,0 +1,29 @@
+{
+    "applications": [
+        {
+            "name": "Spotify",
+            "exe": "Spotify.exe",
+            "logo_path": "Logos/Spotify.json"
+        },
+        {
+            "name": "Discord",
+            "exe": "Discord.exe",
+            "logo_path": "Logos/Discord.json"
+        },
+        {
+            "name": "Chrome",
+            "exe": "chrome.exe",
+            "logo_path": "Logos/Chrome.json"
+        },
+        {
+            "name": "Overwatch",
+            "exe": "overwatch.exe",
+            "logo_path": "Logos/Overwatch.json"
+        },
+        {
+            "name": "Teams",
+            "exe": "teams.exe",
+            "logo_path": "Logos/Teams.json"
+        }
+    ]
+}
