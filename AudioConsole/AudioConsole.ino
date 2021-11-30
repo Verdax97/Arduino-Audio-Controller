@@ -9,7 +9,7 @@ Adafruit_SSD1306 display(128, 64, &Wire, OLED_RESET);
 
 float last1;
 float last2;
-
+float sensitivity = 0.01;
 void setup()
 {
   pinMode(A0, INPUT);
@@ -67,7 +67,7 @@ void loop()
     exitJson["value1"] = val1;
     exitJson["value2"] = val2;
     //send values only if the values difference is greather than 0.5%
-    if (abs(diff1) >= 0.005f || abs(diff2) >= 0.005)
+    if (abs(diff1) >= sensitivity || abs(diff2) >= sensitivity)
     {
       last1 = val1;
       last2 = val2;

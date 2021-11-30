@@ -16,14 +16,19 @@
             "logo_path": "Logos/Chrome.json"
         },
         {
-            "name": "Overwatch",
-            "exe": "overwatch.exe",
-            "logo_path": "Logos/Overwatch.json"
-        },
-        {
             "name": "Teams",
             "exe": "teams.exe",
             "logo_path": "Logos/Teams.json"
+        },
+        {
+            "name": "StarCraft2",
+            "exe": "SC2_x64.exe",
+            "logo_path": "Logos/StarCraft2.json"
+        },
+        {
+            "name": "Overwatch",
+            "exe": "Overwatch.exe",
+            "logo_path": "Logos/Overwatch.json"
         }
     ]
 }

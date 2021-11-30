@@ -15,7 +15,6 @@ def findAusioSession(name, sessions):
 
 def findCurrentSessions(current_page, sessions):
     current_sessions = list()
-    
     for application in current_page.applications:
         session = findAusioSession(application.exe, sessions)
         if(session != None):
@@ -35,6 +34,7 @@ def changePage(current_page, sessions, ser):
     current_sessions = findCurrentSessions(current_page, sessions)
     for application in current_page.applications:
         sendImage(application.logo, ser)
+
     if len(current_page.applications) < 2:
         sendImage("Logos/Test.json", ser)
     return findVolumes(current_sessions)
@@ -48,34 +48,44 @@ def readImageFromFile(name):
 
 def sendImage(name, ser):
     l = readImageFromFile(name)
-    print("sending image")
+    debugInfo("Sending image: " + name, args.debug)
     for val in l:
         ser.write(val.to_bytes(1, byteorder='big'))
-    print("done")
+    debugInfo("done", args.debug)
 
 def debugInfo(info, debug):
     if(debug):
         print(info)
 
-def initialize():
+def createPages(applications):
     pages = list()
-    applications = json.load(open('Applications.json'))['applications']
+    validAps = list()
     i = 0
-    temp = list()
 
     while i < len(applications):
-        app1 = app.application(applications[i]['name'], applications[i]['exe'], applications[i]['logo_path'])
-        if(i < len(applications) - 1):
-            app2 = app.application(applications[i+1]['name'], applications[i+1]['exe'], applications[i+1]['logo_path'])
-            pages.append(pg.page([app1, app2]))
+        if checkExistAudio(applications[i]['exe'], AudioUtilities.GetAllSessions()):
+            validAps.append(app.application(applications[i]['name'], applications[i]['exe'], applications[i]['logo_path']))
+        i += 1
+    i = 0
+    while i < len(validAps):
+        if i < len(validAps) - 1:
+            pages.append(pg.page([validAps[i], validAps[i+1]]))
         else:
-            pages.append(pg.page([app1]))
+            pages.append(pg.page([validAps[i]]))
         i += 2
-    
-    if(i == 1):
-        pages.append(pg.page(temp))
-    
-    debugInfo("Pages: " + pages.__str__(), args.debug)
+    return pages
+
+def checkExistAudio(name, sessions):
+    for session in sessions:
+        if session.Process and session.Process.name() == name:
+            return True
+    return False
+
+def initialize():
+    applications = json.load(open('Applications.json'))['applications']
+    pages = createPages(applications)
+    debugInfo("Applications: " + applications.__str__(), args.applications)
+    debugInfo("Pages: " + pages.__str__(), args.pages)
     page_index = 0
     current_page = pages[page_index]
 
@@ -95,19 +105,24 @@ def initialize():
 
             cmd = message["command"]
             vals = list([message["value1"], message["value2"]])
-            debugInfo("cmd " + str(cmd), args.debug)
-
+            debugInfo("cmd " + str(cmd), args.command)
+            #change values
             if(cmd == 0):
                 i = 0
-                for volume in volumes:
-                    debugInfo("volume " + str(i) + ": " + str(float(vals[i])), args.debug)
-                    volume.SetMasterVolume(float(vals[i]), None)
-                    i +=1
+                j = 0
+                for application in current_page.applications:
+                    debugInfo("changing " + application.exe, args.volumes)
+                    if len(volumes) > i and checkExistAudio(application.exe, findCurrentSessions(current_page, sessions)):
+                        debugInfo("volume " + str(i) + ": " + str(float(vals[j])), args.volumes)
+                        volumes[i].SetMasterVolume(float(vals[j]), None)
+                        i +=1
+                    j += 1
             #next page
             elif(cmd == 1):
+                pages = createPages(applications)
                 page_index = nextPageIndex(pages, page_index)
                 current_page = pages[page_index]
-                debugInfo("page_index " + str(page_index) + current_page.__str__(), args.debug)
+                debugInfo("page_index " + str(page_index) + current_page.__str__(), args.pages)
                 sessions = AudioUtilities.GetAllSessions()
                 volumes = changePage(current_page, sessions, ser)
         else:
@@ -116,6 +131,10 @@ def initialize():
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('-d', '--debug', action='store_true', help='display debug info')
+    parser.add_argument('-a', '--applications', action='store_true', help='application list debug info')
+    parser.add_argument('-v', '--volumes', action='store_true', help='volumes debug info')
+    parser.add_argument('-c', '--command', action='store_true', help='command debug info')
+    parser.add_argument('-p', '--pages', action='store_true', help='pages debug info')
     args = parser.parse_args()
     initialize()
 
